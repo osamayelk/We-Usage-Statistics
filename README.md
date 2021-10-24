@@ -52,6 +52,10 @@ The package depends on the following:
 - Axios for the Http requests to the WE Backend 
 - Node-cache to cache the tokens for the user
 
+## Tasker task
+
+I mainly wrote this code to use with Tasker to get a daily notification with my internet usage statistics, so I added the file **taskerTask.xml** with the steps for the tasker task. just replace the ${msisdn} and ${encrypted_password} variables with your values and import it in your Tasker application
+
 ## Next Steps
 
 - [ ] Reverse engineer the encryption algorithm to be able to send the passwords as plain text
