@@ -2,8 +2,8 @@ const btoa = require("btoa")
 const aesJS = require("aes-js");
 module.exports = {
     encrypt(password) {
-        const key = process.env.AES_KEY;"0f0e0d0c0b0a09080706050403020100";
-        const iv = process.env.AES_IV;"000102030405060708090a0b0c0d0e0f";
+        const key = process.env.AES_KEY;
+        const iv = process.env.AES_IV;
         return btoa(
             String.fromCharCode.apply(null,
                 new aesJS.ModeOfOperation.cbc(hexToBytes(key),
