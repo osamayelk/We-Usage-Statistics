@@ -1,6 +1,9 @@
 const weService = require('./services/weService');
+const passwordEncryptionService = require("./services/passwordEncryptionService");
 if (process.argv.length > 2) {
-    weService.fetchStatistics(process.argv[2], process.argv[3]).then(statistics => {
+    const password = passwordEncryptionService.encrypt(process.argv[3]);
+    const msisdn = process.argv[2];
+    weService.fetchStatistics(msisdn, password).then(statistics => {
         console.log(statistics);
     });
 } else {
@@ -9,7 +12,7 @@ if (process.argv.length > 2) {
     var app = express();
     app.get("/api/statistics", (req, res) => {
         const msisdn = req.query.msisdn;
-        const password = req.query.password;
+        const password = passwordEncryptionService.encrypt(req.query.password);
         weService.fetchStatistics(msisdn, password).then(statistics => {
             res.status(200).send(statistics);
         }).catch(err => {

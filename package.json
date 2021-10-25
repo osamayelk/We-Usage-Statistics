@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aes-js": "^3.1.2",
     "axios": "^0.23.0",
+    "btoa": "^1.2.1",
     "express": "^4.17.1",
     "node-cache": "^5.1.2"
   }
