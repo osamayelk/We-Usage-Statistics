@@ -57,7 +57,8 @@ The package depends on the following:
 
 ## Tasker task
 
-I mainly wrote this code to use with Tasker to get a daily notification with my internet usage statistics, so I added the file **taskerTask.xml** with the steps for the tasker task. just replace the ${msisdn} and ${password} variables with your values and import it in your Tasker application
+I mainly wrote this code to use with Tasker to get a notification with my internet usage statistics when they're almost done and to populate a KWGT widget with my statistics,
+so I added the file **tasker/taskerTask.xml** and a README file explaining how to use the tasker file
 
 ## Next Steps
 
