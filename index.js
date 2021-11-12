@@ -5,6 +5,8 @@ if (process.argv.length > 2) {
     const msisdn = process.argv[2];
     weService.fetchStatistics(msisdn, password).then(statistics => {
         console.log(statistics);
+    }).catch(err => {
+        console.error(err);
     });
 } else {
     const express = require('express');

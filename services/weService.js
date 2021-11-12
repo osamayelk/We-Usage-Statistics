@@ -3,11 +3,17 @@ const nodeCache = require('node-cache');
 const weCache = new nodeCache({stdTTL: 1200});
 module.exports = {
     async fetchStatistics(msisdn, password) {
+        let token = weCache.get('jwtToken');
         let loginInfo = weCache.get(msisdn + password)
-        if (loginInfo === undefined) {
+        if (!token && !loginInfo) {
             token = await fetchJWTToken();
+            let remainingTime =  getTokenExpiryInMilliseconds(token);
+            weCache.set('jwtToken', token, remainingTime);
+        }
+        if (!loginInfo) {
             loginInfo = await login(token, password, msisdn);
-            weCache.set(msisdn + password, loginInfo);
+            let remainingTime =  getTokenExpiryInMilliseconds(loginInfo.jwt);
+            weCache.set(msisdn + password, loginInfo, remainingTime);
         }
         customerId = loginInfo.customerId;
         cookie = loginInfo.cookie;
@@ -87,4 +93,13 @@ function fetchJWTToken() {
             reject(err);
         });
     })
+}
+
+function getTokenExpiryInMilliseconds(token) {
+    const decoded = decodeJWTTokenToObject(token);
+    return (decoded.exp * 1000) - new Date().getTime();
+}
+
+function decodeJWTTokenToObject(token) {
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('ascii'));
 }
