@@ -6,8 +6,11 @@ The password being sent to the backend gets encrypted using AES (Cipher Block Ch
 I've extracted the ones being used in the frontend to be used as environment variables being passed to the server,
 these variables need to be set for the code to work
 
+You can also add an environment variable for the client JWT token since it takes years to expire. This saves the number of requests being sent
+
 - **AES_KEY**: "0f0e0d0c0b0a09080706050403020100"
 - **AES_IV**: "000102030405060708090a0b0c0d0e0f"
+- **JWT**: Just take the value being received from line 12 in weService.js
 
 ## Usage
 The code could be run directly using Node 14 or if you don't want to worry about the environment just build and run the Dockerfile using the following commands:
