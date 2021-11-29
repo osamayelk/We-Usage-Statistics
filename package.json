@@ -15,5 +15,8 @@
     "btoa": "^1.2.1",
     "express": "^4.17.1",
     "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "mocha": "^9.1.3"
   }
 }
