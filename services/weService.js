@@ -4,21 +4,21 @@ const weCache = new nodeCache({stdTTL: 1200});
 module.exports = {
     async fetchStatistics(msisdn, password) {
         let token = weCache.get('jwtToken');
-        let loginInfo = weCache.get(msisdn + password)
+        let loginInfo = weCache.get(msisdn + password);
         if (!token && !loginInfo) {
             token = await fetchJWTToken();
-            let remainingTime =  getTokenExpiryInMilliseconds(token);
+            let remainingTime = getTokenExpiryInMilliseconds(token);
             weCache.set('jwtToken', token, remainingTime);
         }
         if (!loginInfo) {
             loginInfo = await login(token, password, msisdn);
-            let remainingTime =  getTokenExpiryInMilliseconds(loginInfo.jwt);
+            let remainingTime = getTokenExpiryInMilliseconds(loginInfo.jwt);
             weCache.set(msisdn + password, loginInfo, remainingTime);
         }
-        customerId = loginInfo.customerId;
-        cookie = loginInfo.cookie;
+        const customerId = loginInfo.customerId;
+        const cookie = loginInfo.cookie;
         token = loginInfo.jwt;
-        return await getUsage(token, msisdn, customerId, cookie);
+        return getUsage(token, msisdn, customerId, cookie);
     }
 }
 
@@ -38,14 +38,20 @@ function getUsage(jwtToken, msisdn, customerId, cookie) {
         };
         axios.post('https://api-my.te.eg/api/line/freeunitusage', payload, config).then(res => {
             if (res.data.header.responseMessage.toLowerCase().indexOf("success") > -1) {
+                var summary = res.data.body.summarizedLineUsageList.filter(item =>
+                    item.summaryGroupName === 'ADSL_USAGE_PREPAID'
+                )[0];
+                var details = res.data.body.detailedLineUsageList.filter(item =>
+                    item.itemCode === 'C_TED_Primary_Fixed_Data'
+                )[0];
                 const statistics = {
-                    total: res.data.body.detailedLineUsageList[0].initialTotalAmount,
-                    used: res.data.body.detailedLineUsageList[0].usedAmount,
-                    remaining: res.data.body.detailedLineUsageList[0].freeAmount,
-                    percentage: res.data.body.detailedLineUsageList[0].usagePercentage,
-                    daysLeft: res.data.body.detailedLineUsageList[0].remainingDaysForRenewal,
-                    expiryDate: res.data.body.detailedLineUsageList[0].renewalDate,
-                    subscriptionDate: res.data.body.detailedLineUsageList[0].subscriptionDate
+                    total: summary.initialTotalAmount,
+                    used: summary.usedAmount,
+                    remaining: summary.freeAmount,
+                    percentage: summary.usagePercentage,
+                    daysLeft: details.remainingDaysForRenewal,
+                    expiryDate: details.renewalDate,
+                    subscriptionDate: details.subscriptionDate
                 }
                 resolve(statistics);
             } else {
@@ -72,7 +78,7 @@ function login(jwtToken, password, msisdn) {
         };
         axios.post('https://api-my.te.eg/api/user/login?channelId=WEB_APP', payload, config).then(res => {
             if (res.data.header.responseMessage.indexOf('success') > -1) {
-                customerId = res.data.header.customerId;
+                const customerId = res.data.header.customerId;
                 const cookie = res.headers["set-cookie"];
                 resolve({customerId: customerId, cookie, jwt: res.data.body.jwt});
             } else {
