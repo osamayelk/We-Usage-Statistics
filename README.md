@@ -10,7 +10,7 @@ You can also add an environment variable for the client JWT token since it takes
 
 - **AES_KEY**: "0f0e0d0c0b0a09080706050403020100"
 - **AES_IV**: "000102030405060708090a0b0c0d0e0f"
-- **JWT**: Just take the value being received from line 12 in weService.js
+- **JWT**: Just take the value being received from [this line](https://github.com/OsamaYousry/We-Usage-Statistics/blob/700669e66bf0d03c57517da5e8c60fe51ed40e3f/services/weService.js#L12)
 
 ## Usage
 The code could be run directly using Node 14 or if you don't want to worry about the environment just build and run the Dockerfile using the following commands:
