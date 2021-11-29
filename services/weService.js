@@ -6,7 +6,10 @@ module.exports = {
         let token = weCache.get('jwtToken');
         let loginInfo = weCache.get(msisdn + password);
         if (!token && !loginInfo) {
-            token = await fetchJWTToken();
+            if (process.env.JWT) {
+                token = process.env.JWT;
+            }
+            else token = await fetchJWTToken();
             let remainingTime = getTokenExpiryInMilliseconds(token);
             weCache.set('jwtToken', token, remainingTime);
         }
