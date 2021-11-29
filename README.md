@@ -28,7 +28,7 @@ docker run -e AES_KEY=${AES_KEY} -e AES_IV=${AES_IV} --rm -p ${PORT}:3000 westat
 
 ### Command Line
 To run the code on the command line just run 
-`node index.js $PHONE_NUMBER $PASSWORD`
+`node index.ts $PHONE_NUMBER $PASSWORD`
 
 ### API
 You can call the following API if you don't pass any command line arguments
