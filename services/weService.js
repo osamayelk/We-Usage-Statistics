@@ -47,7 +47,7 @@ function getUsage(jwtToken, msisdn, customerId, cookie) {
                 var details = res.data.body.detailedLineUsageList.filter(item =>
                     item.itemCode === 'C_TED_Primary_Fixed_Data'
                 )[0];
-                var remainingDaysUntilRenewal = Math.ceil((new Date(details.renewalDate + " 23:59:59").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                var remainingDaysUntilRenewal = Math.ceil((new Date(details.renewalDate + " 23:59:59+02:00").getTime() - new Date().getTime()) / (1000 * 3600 * 24));
                 const statistics = {
                     total: summary.initialTotalAmount,
                     used: summary.usedAmount,
