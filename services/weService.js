@@ -2,7 +2,7 @@ const axios = require("axios");
 const nodeCache = require('node-cache');
 const weCache = new nodeCache({stdTTL: 1200});
 module.exports = {
-    async fetchStatistics(msisdn, password) {
+    async fetchStatistics(msisdn, password, requestMsisdn = null) {
         let token = weCache.get('jwtToken');
         let loginInfo = weCache.get(msisdn + password);
         if (!token && !loginInfo) {
@@ -21,7 +21,7 @@ module.exports = {
         const customerId = loginInfo.customerId;
         const cookie = loginInfo.cookie;
         token = loginInfo.jwt;
-        return getUsage(token, msisdn, customerId, cookie);
+        return getUsage(token, requestMsisdn ? requestMsisdn : msisdn, customerId, cookie);
     }
 }
 
