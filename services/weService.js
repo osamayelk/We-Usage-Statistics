@@ -3,26 +3,36 @@ const nodeCache = require('node-cache');
 const weCache = new nodeCache({stdTTL: 1200});
 module.exports = {
     async fetchStatistics(msisdn, password, requestMsisdn = null) {
-        let token = weCache.get('jwtToken');
-        let loginInfo = weCache.get(msisdn + password);
-        if (!token && !loginInfo) {
-            if (process.env.JWT) {
-                token = process.env.JWT;
-            }
-            else token = await fetchJWTToken();
-            let remainingTime = getTokenExpiryInMilliseconds(token);
-            weCache.set('jwtToken', token, remainingTime);
-        }
-        if (!loginInfo) {
-            loginInfo = await login(token, password, msisdn);
-            let remainingTime = getTokenExpiryInMilliseconds(loginInfo.jwt);
-            weCache.set(msisdn + password, loginInfo, remainingTime);
-        }
-        const customerId = loginInfo.customerId;
-        const cookie = loginInfo.cookie;
-        token = loginInfo.jwt;
+        let {token, customerId, cookie} = await authorize(msisdn, password);
         return getUsage(token, requestMsisdn ? requestMsisdn : msisdn, customerId, cookie);
+    },
+    async getPaymentUrl(msisdn, password, requestMsisdn = null) {
+        let {token, customerId, cookie} = await authorize(msisdn, password);
+        const dueAmount = await getDueAmount(token, requestMsisdn ? requestMsisdn : msisdn, customerId, cookie);
+        const hashCode = await payDueAmount(token, requestMsisdn ? requestMsisdn : msisdn, customerId, cookie, dueAmount);
+        return `https://payments.tedata.net/net.tedata.topG.ui/ViewPaymentWidget?transactionHashCode=${hashCode}`;
     }
+}
+
+async function authorize(msisdn, password) {
+    let token = weCache.get('jwtToken');
+    let loginInfo = weCache.get(msisdn + password);
+    if (!token && !loginInfo) {
+        if (process.env.JWT) {
+            token = process.env.JWT;
+        } else token = await fetchJWTToken();
+        let remainingTime = getTokenExpiryInMilliseconds(token);
+        weCache.set('jwtToken', token, remainingTime);
+    }
+    if (!loginInfo) {
+        loginInfo = await login(token, password, msisdn);
+        let remainingTime = getTokenExpiryInMilliseconds(loginInfo.jwt);
+        weCache.set(msisdn + password, loginInfo, remainingTime);
+    }
+    const customerId = loginInfo.customerId;
+    const cookie = loginInfo.cookie;
+    token = loginInfo.jwt;
+    return {token, customerId, cookie};
 }
 
 function getUsage(jwtToken, msisdn, customerId, cookie) {
@@ -65,6 +75,66 @@ function getUsage(jwtToken, msisdn, customerId, cookie) {
             reject(err);
         })
     })
+}
+
+function getDueAmount(jwtToken, msisdn, customerId, cookie) {
+    return new Promise((resolve, reject) => {
+        let payload = {
+            header: {
+                msisdn: msisdn, locale: "en", customerId: customerId
+            }
+        };
+        let config = {
+            headers: {
+                jwt: jwtToken,
+                Cookie: cookie
+            },
+            withCredentials: true
+        };
+        axios.post('https://api-my.te.eg/api/services/due', payload, config).then(res => {
+            if (res.data.header.responseMessage.toLowerCase().indexOf("success") > -1) {
+                var totalAmount = res.data.body.totalAmount;
+                resolve(totalAmount);
+            } else {
+                reject(res.data.header.responseMessage);
+            }
+        }).catch(err => {
+            reject(err);
+        });
+    });
+}
+
+function payDueAmount(jwtToken, msisdn, customerId, cookie, dueAmount) {
+    return new Promise((resolve, reject) => {
+        let payload = {
+            header: {
+                msisdn: msisdn, locale: "en", customerId: customerId
+            },
+            body: {
+                amount: dueAmount*1,
+                redirectionURL: 'https://my.te.eg/payment/finalize-payment',
+                sourceMobileNumber: msisdn,
+                targetMobileNumber: msisdn
+            }
+        };
+        let config = {
+            headers: {
+                Jwt: jwtToken,
+                Cookie: cookie,
+                Origin: 'https://my.te.eg',
+                'Content-Type': 'application/json'
+            }
+        };
+        axios.post('https://api-my.te.eg/api/payment/pay/unregisteredcard/initiate', payload, config).then(res => {
+            if (res.data.header.responseMessage.toLowerCase().indexOf("success") > -1) {
+                resolve(res.data.body.hashCode);
+            } else {
+                reject(res.data.header.responseMessage);
+            }
+        }).catch(err => {
+            reject(err);
+        });
+    });
 }
 
 function login(jwtToken, password, msisdn) {

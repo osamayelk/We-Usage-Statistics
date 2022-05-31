@@ -23,6 +23,16 @@ if (process.argv.length > 2) {
             res.status(500).send(err);
         })
     });
+    app.get("/api/payment", (req, res) => {
+        const msisdn = req.query.msisdn;
+        const password = passwordEncryptionService.encrypt(req.query.password);
+        const requestMsisdn = req.query.requestMsisdn;
+        weService.getPaymentUrl(msisdn, password, requestMsisdn).then(paymentUrl => {
+            res.status(200).redirect(paymentUrl);
+        }).catch(err => {
+            res.status(500).send(err);
+        });
+    })
     const server = http.createServer(app);
     server.listen(3000);
     server.on('listening', () => {
