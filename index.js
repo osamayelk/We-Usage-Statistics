@@ -1,14 +1,24 @@
 const weService = require('./services/weService');
 const passwordEncryptionService = require("./services/passwordEncryptionService");
 if (process.argv.length > 2) {
-    const password = passwordEncryptionService.encrypt(process.argv[3]);
-    const msisdn = process.argv[2];
-    const requestMsisdn = process.argv[4];
-    weService.fetchStatistics(msisdn, password, requestMsisdn).then(statistics => {
-        console.log(statistics);
-    }).catch(err => {
-        console.error(err);
-    });
+    const operation = process.argv[2]
+    const password = passwordEncryptionService.encrypt(process.argv[4]);
+    const msisdn = process.argv[3];
+    const requestMsisdn = process.argv[5];
+    if (operation === 'query')
+        weService.fetchStatistics(msisdn, password, requestMsisdn).then(statistics => {
+            console.log(statistics);
+        }).catch(err => {
+            console.error(err);
+        });
+    else if (operation === 'payment')
+        weService.getPaymentUrl(msisdn, password, requestMsisdn).then(paymentUrl => {
+            console.log(paymentUrl);
+        }).catch(err => {
+            console.error(err);
+        });
+    else
+        console.error('Invalid operation');
 } else {
     const express = require('express');
     const http = require('http');

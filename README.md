@@ -19,7 +19,7 @@ docker build -t westatistics .
 ````
 Then running for command line:
 ````
-docker run -e AES_KEY=${AES_KEY} -e AES_IV=${AES_IV} --rm westatistics $PHONE_NUMBER $PASSWORD
+docker run -e AES_KEY=${AES_KEY} -e AES_IV=${AES_IV} --rm westatistics $OPERATION $PHONE_NUMBER $PASSWORD $OptionalManagedPhone
 ````
 Or running as a server:
 ````
@@ -27,12 +27,19 @@ docker run -e AES_KEY=${AES_KEY} -e AES_IV=${AES_IV} --rm -p ${PORT}:3000 westat
 ````
 
 ### Command Line
-To run the code on the command line just run 
-`node index.js $PHONE_NUMBER $PASSWORD`
+To run the code on the command line just run
+`node index.js $OPERATION $PHONE_NUMBER $PASSWORD $OptionalManagedPhone`
+Where operation has two values:
+
+- **query**: to fetch the statistics
+- **payment** to generate a payment url
 
 ### API
-You can call the following API if you don't pass any command line arguments
-`/api/statistics?msisdn=${phoneNumber}&password=${password}`
+You can call the following API to query statistics if you don't pass any command line arguments
+`/api/statistics?msisdn=${phoneNumber}&password=${password}&requestMsisdn=${managedPhone}`
+
+And this API for generating the Payment URL
+`/api/payment?msisdn=${phoneNumber}&password=${password}&requestMsisdn=${managedPhone}`
 
 ### Response
 For the command line or the API, I made a unified response
