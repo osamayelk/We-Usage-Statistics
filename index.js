@@ -27,6 +27,7 @@ if (process.argv.length > 2) {
         const msisdn = req.query.msisdn;
         const password = passwordEncryptionService.encrypt(req.query.password);
         const requestMsisdn = req.query.requestMsisdn;
+        console.log('Fetching statistics for ' + msisdn);
         weService.fetchStatistics(msisdn, password, requestMsisdn).then(statistics => {
             res.status(200).send(statistics);
         }).catch(err => {

@@ -15,6 +15,7 @@ module.exports = {
 }
 
 async function authorize(msisdn, password) {
+    console.log('Logging in...');
     let token = weCache.get('jwtToken');
     let loginInfo = weCache.get(msisdn + password);
     if (!token && !loginInfo) {
@@ -165,6 +166,7 @@ function login(jwtToken, password, msisdn) {
 }
 
 function fetchJWTToken() {
+    console.log('Fetching JWT token...');
     return new Promise((resolve, reject) => {
         axios.get("https://api-my.te.eg/api/user/generatetoken?channelId=WEB_APP").then(res => {
             let jwtToken = res.data.body.jwt;
