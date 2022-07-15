@@ -50,6 +50,7 @@ function getUsage(jwtToken, msisdn, customerId, cookie) {
             },
             withCredentials: true
         };
+        console.log('Getting usage');
         axios.post('https://api-my.te.eg/api/line/freeunitusage', payload, config).then(res => {
             if (res.data.header.responseMessage.toLowerCase().indexOf("success") > -1) {
                 var summary = res.data.body.summarizedLineUsageList.filter(item =>
@@ -151,6 +152,7 @@ function login(jwtToken, password, msisdn) {
             },
             withCredentials: true
         };
+        console.log('Sending login request...');
         axios.post('https://api-my.te.eg/api/user/login?channelId=WEB_APP', payload, config).then(res => {
             if (res.data.header.responseMessage.indexOf('success') > -1) {
                 const customerId = res.data.header.customerId;
