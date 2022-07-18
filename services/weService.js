@@ -1,6 +1,11 @@
 const axios = require("axios");
 const nodeCache = require('node-cache');
 const weCache = new nodeCache({stdTTL: 1200});
+const axiosRetry = require('axios-retry');
+axiosRetry(axios, {
+    retries: 3,
+    retryDelay: axiosRetry.exponentialDelay
+});
 module.exports = {
     async fetchStatistics(msisdn, password, requestMsisdn = null) {
         let {token, customerId, cookie} = await authorize(msisdn, password);
@@ -23,12 +28,12 @@ async function authorize(msisdn, password) {
             token = process.env.JWT;
         } else token = await fetchJWTToken();
         let remainingTime = getTokenExpiryInMilliseconds(token);
-        weCache.set('jwtToken', token, remainingTime);
+        weCache.set('jwtToken', token, remainingTime / 1000);
     }
     if (!loginInfo) {
         loginInfo = await login(token, password, msisdn);
         let remainingTime = getTokenExpiryInMilliseconds(loginInfo.jwt);
-        weCache.set(msisdn + password, loginInfo, remainingTime);
+        weCache.set(msisdn + password, loginInfo, remainingTime / 1000);
     }
     const customerId = loginInfo.customerId;
     const cookie = loginInfo.cookie;
@@ -113,7 +118,7 @@ function payDueAmount(jwtToken, msisdn, customerId, cookie, dueAmount) {
                 msisdn: msisdn, locale: "en", customerId: customerId
             },
             body: {
-                amount: dueAmount*1,
+                amount: dueAmount * 1,
                 redirectionURL: 'https://my.te.eg/payment/finalize-payment',
                 sourceMobileNumber: msisdn,
                 targetMobileNumber: msisdn
